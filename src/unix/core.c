@@ -150,11 +150,11 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
   case UV_FS_POLL:
     uv__fs_poll_close((uv_fs_poll_t*)handle);
     break;
-
+#ifdef __linux__
   case UV_AIO:
     uv__aio_close((uv_aio_t*)handle);
     break;
-
+#endif
   case UV_SIGNAL:
     uv__signal_close((uv_signal_t*) handle);
     /* Signal handles may not be closed immediately. The signal code will */

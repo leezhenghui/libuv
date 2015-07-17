@@ -1476,6 +1476,8 @@ struct uv_loop_s {
 #undef UV_SIGNAL_PRIVATE_FIELDS
 #undef UV_LOOP_PRIVATE_FIELDS
 #undef UV_LOOP_PRIVATE_PLATFORM_FIELDS
+#undef UV_AIO_PRIVATE_FIELDS
+#undef UV_FS_PRIVATE_AIO_FIELDS
 
 #ifdef __cplusplus
 }

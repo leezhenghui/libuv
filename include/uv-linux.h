@@ -22,13 +22,28 @@
 #ifndef UV_LINUX_H
 #define UV_LINUX_H
 
+#include <linux/aio_abi.h>
+
 #define UV_PLATFORM_LOOP_FIELDS                                               \
   uv__io_t inotify_read_watcher;                                              \
   void* inotify_watchers;                                                     \
   int inotify_fd;                                                             \
+  uv_aio_t   wq_aio;                                                          \
+  struct uv__aio aio_watcher;                                                 \
+  void* aio_handles[2];                                                       \
+
 
 #define UV_PLATFORM_FS_EVENT_FIELDS                                           \
   void* watchers[2];                                                          \
   int wd;                                                                     \
+
+
+#define UV_AIO_PRIVATE_FIELDS                                                 \
+  uv_aio_cb aio_cb;                                                           \
+  void* queue[2];                                                             \
+
+#define UV_FS_PRIVATE_AIO_FIELDS                                              \
+  struct iocb *iocbs;                                                         \
+  int aio_nr;                                                                 \
 
 #endif /* UV_LINUX_H */

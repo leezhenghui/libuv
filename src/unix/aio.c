@@ -3,7 +3,7 @@
 #include "atomic-ops.h"
 
 #include <errno.h>
-#include <stdio.h>  /* snprintf() */
+#include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,8 +14,8 @@
 
 /* -----------------------------------------------------------*/
 static void uv__aio_event(uv_loop_t* loop,
-                            struct uv__aio* w,
-                            unsigned int nevents);
+                          struct uv__aio* w,
+                          unsigned int nevents);
 
 int uv_aio_init(uv_loop_t* loop, uv_aio_t* handle, uv_aio_cb aio_cb) {
   int err;
@@ -39,7 +39,6 @@ void uv__aio_work_done(uv_aio_t* handle, int64_t n) {
   int i, r;
   struct uv__aio* wa = &handle->loop->aio_watcher;
   struct io_event* events = uv__malloc(sizeof(struct io_event) * n);
-  
 
   while (n > 0) {
     tms.tv_sec = 0;

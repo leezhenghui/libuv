@@ -42,7 +42,6 @@
 #include "pthread-fixes.h"
 #endif
 #include <signal.h>
-#include <linux/aio_abi.h>
 
 #include "uv-threadpool.h"
 
@@ -73,9 +72,16 @@
 # define UV_IO_PRIVATE_PLATFORM_FIELDS /* empty */
 #endif
 
+#ifndef UV_FS_PRIVATE_AIO_FIELDS
+# define UV_FS_PRIVATE_AIO_FIELDS /* empty */
+#endif
+
+#ifndef UV_AIO_PRIVATE_FIELDS
+# define UV_AIO_PRIVATE_FIELDS /* empty */
+#endif
+
 struct uv__io_s;
 struct uv__async;
-struct uv__aio;
 struct uv_loop_s;
 
 typedef void (*uv__io_cb)(struct uv_loop_s* loop,
@@ -103,15 +109,18 @@ struct uv__async {
   int wfd;
 };
 
+#ifdef __linux__
+struct uv__aio;
 typedef void (*uv__aio_cb)(struct uv_loop_s* loop,
-                             struct uv__aio* w,
-                             unsigned int nevents);
+                           struct uv__aio* w,
+                           unsigned int nevents);
 struct uv__aio {
   uv__aio_cb cb;
   uv__io_t aio_watcher;
   aio_context_t ctx;
   int wfd;
 };
+#endif
 
 #ifndef UV_PLATFORM_SEM_T
 # define UV_PLATFORM_SEM_T sem_t
@@ -229,7 +238,6 @@ typedef struct {
   void* wq[2];                                                                \
   uv_mutex_t wq_mutex;                                                        \
   uv_async_t wq_async;                                                        \
-  uv_aio_t   wq_aio;                                                          \
   uv_rwlock_t cloexec_lock;                                                   \
   uv_handle_t* closing_handles;                                               \
   void* process_handles[2];                                                   \
@@ -237,9 +245,7 @@ typedef struct {
   void* check_handles[2];                                                     \
   void* idle_handles[2];                                                      \
   void* async_handles[2];                                                     \
-  void* aio_handles[2];                                                       \
   struct uv__async async_watcher;                                             \
-  struct uv__aio aio_watcher;                                                 \
   struct {                                                                    \
     void* min;                                                                \
     unsigned int nelts;                                                       \
@@ -328,9 +334,6 @@ typedef struct {
   void* queue[2];                                                             \
   int pending;                                                                \
 
-#define UV_AIO_PRIVATE_FIELDS                                                 \
-  uv_aio_cb aio_cb;                                                           \
-  void* queue[2];                                                             \
 
 #define UV_TIMER_PRIVATE_FIELDS                                               \
   uv_timer_cb timer_cb;                                                       \
@@ -375,8 +378,7 @@ typedef struct {
   double mtime;                                                               \
   struct uv__work work_req;                                                   \
   uv_buf_t bufsml[4];                                                         \
-  struct iocb *iocbs;                                                         \
-  int aio_nr;                                                                 \
+  UV_FS_PRIVATE_AIO_FIELDS
 
 
 #define UV_WORK_PRIVATE_FIELDS                                                \
