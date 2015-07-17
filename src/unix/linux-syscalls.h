@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+#include <linux/aio_abi.h>
 
 #if defined(__alpha__)
 # define UV__O_CLOEXEC        0x200000
@@ -154,5 +155,12 @@ int uv__utimesat(int dirfd,
 ssize_t uv__preadv(int fd, const struct iovec *iov, int iovcnt, off_t offset);
 ssize_t uv__pwritev(int fd, const struct iovec *iov, int iovcnt, off_t offset);
 int uv__dup3(int oldfd, int newfd, int flags);
-
+/* linux aio support */
+int uv__setup(unsigned nr, aio_context_t *ctxp);
+int uv__submit(aio_context_t ctx, long nr,  struct iocb **iocbpp);
+int uv__getevents(aio_context_t ctx, long min_nr, long max_nr,
+        struct io_event *events, struct timespec *timeout);
+int uv__destroy(aio_context_t ctx);
+int uv__cancel(aio_context_t ctx, struct iocb *iocb,
+               struct io_event *event);
 #endif /* UV_LINUX_SYSCALL_H_ */

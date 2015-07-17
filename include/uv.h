@@ -141,6 +141,7 @@ extern "C" {
   XX(EHOSTDOWN, "host is down")                                               \
 
 #define UV_HANDLE_TYPE_MAP(XX)                                                \
+  XX(AIO, aio)                                                                \
   XX(ASYNC, async)                                                            \
   XX(CHECK, check)                                                            \
   XX(FS_EVENT, fs_event)                                                      \
@@ -209,6 +210,7 @@ typedef struct uv_prepare_s uv_prepare_t;
 typedef struct uv_check_s uv_check_t;
 typedef struct uv_idle_s uv_idle_t;
 typedef struct uv_async_s uv_async_t;
+typedef struct uv_aio_s uv_aio_t;
 typedef struct uv_process_s uv_process_t;
 typedef struct uv_fs_event_s uv_fs_event_t;
 typedef struct uv_fs_poll_s uv_fs_poll_t;
@@ -300,6 +302,7 @@ typedef void (*uv_close_cb)(uv_handle_t* handle);
 typedef void (*uv_poll_cb)(uv_poll_t* handle, int status, int events);
 typedef void (*uv_timer_cb)(uv_timer_t* handle);
 typedef void (*uv_async_cb)(uv_async_t* handle);
+typedef void (*uv_aio_cb)(uv_aio_t* handle, int64_t events);
 typedef void (*uv_prepare_cb)(uv_prepare_t* handle);
 typedef void (*uv_check_cb)(uv_check_t* handle);
 typedef void (*uv_idle_cb)(uv_idle_t* handle);
@@ -760,7 +763,15 @@ UV_EXTERN int uv_async_init(uv_loop_t*,
                             uv_async_cb async_cb);
 UV_EXTERN int uv_async_send(uv_async_t* async);
 
+/* AIO */
+struct uv_aio_s {
+  UV_HANDLE_FIELDS
+  UV_AIO_PRIVATE_FIELDS
+};
 
+UV_EXTERN int uv_aio_init(uv_loop_t* loop,
+                          uv_aio_t* handle,
+                          uv_aio_cb aio_cb);
 /*
  * uv_timer_t is a subclass of uv_handle_t.
  *

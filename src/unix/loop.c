@@ -38,6 +38,7 @@ int uv_loop_init(uv_loop_t* loop) {
   QUEUE_INIT(&loop->active_reqs);
   QUEUE_INIT(&loop->idle_handles);
   QUEUE_INIT(&loop->async_handles);
+  QUEUE_INIT(&loop->aio_handles);
   QUEUE_INIT(&loop->check_handles);
   QUEUE_INIT(&loop->prepare_handles);
   QUEUE_INIT(&loop->handle_queue);
@@ -51,6 +52,7 @@ int uv_loop_init(uv_loop_t* loop) {
   loop->closing_handles = NULL;
   uv__update_time(loop);
   uv__async_init(&loop->async_watcher);
+  uv__aio_init(&loop->aio_watcher);
   loop->signal_pipefd[0] = -1;
   loop->signal_pipefd[1] = -1;
   loop->backend_fd = -1;
@@ -79,7 +81,13 @@ int uv_loop_init(uv_loop_t* loop) {
 
   uv__handle_unref(&loop->wq_async);
   loop->wq_async.flags |= UV__HANDLE_INTERNAL;
+#if 1
+  if (uv_aio_init(loop, &loop->wq_aio, uv__aio_work_done))
+    abort();
 
+  uv__handle_unref(&loop->wq_aio);
+  loop->wq_aio.flags |= UV__HANDLE_INTERNAL;
+#endif
   return 0;
 }
 
@@ -88,6 +96,7 @@ void uv__loop_close(uv_loop_t* loop) {
   uv__signal_loop_cleanup(loop);
   uv__platform_loop_delete(loop);
   uv__async_stop(loop, &loop->async_watcher);
+  uv__aio_stop(loop, &loop->aio_watcher);
 
   if (loop->emfile_fd != -1) {
     uv__close(loop->emfile_fd);

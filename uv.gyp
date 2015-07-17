@@ -131,6 +131,7 @@
             'include/uv-bsd.h',
             'include/uv-aix.h',
             'src/unix/async.c',
+            'src/unix/aio.c',
             'src/unix/atomic-ops.h',
             'src/unix/core.c',
             'src/unix/dl.c',

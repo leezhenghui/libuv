@@ -54,6 +54,10 @@
 # define HAVE_PREADV 0
 #endif
 
+#ifdef __linux__
+#define USE_LINUX_AIO 1
+#endif
+
 #if defined(__linux__) || defined(__sun)
 # include <sys/sendfile.h>
 #endif
@@ -119,6 +123,10 @@ static ssize_t uv__fs_fdatasync(uv_fs_t* req) {
 #endif
 }
 
+static int POST_AIO(uv_loop_t* loop, uv_fs_t* req) {
+  uv_aio_submit(&loop->wq_aio, req);
+  return 0;
+}
 
 static ssize_t uv__fs_futime(uv_fs_t* req) {
 #if defined(__linux__)
@@ -1049,8 +1057,15 @@ int uv_fs_read(uv_loop_t* loop, uv_fs_t* req,
   memcpy(req->bufs, bufs, nbufs * sizeof(*bufs));
 
   req->off = off;
+#ifndef USE_LINUX_AIO
   POST;
+#else
+  if (!cb) POST; 
+  return POST_AIO(loop, req);
+#endif
 }
+
+/* aio read*/
 
 
 int uv_fs_scandir(uv_loop_t* loop,
@@ -1149,6 +1164,7 @@ int uv_fs_utime(uv_loop_t* loop,
   POST;
 }
 
+/* aio version */
 
 int uv_fs_write(uv_loop_t* loop,
                 uv_fs_t* req,
@@ -1171,7 +1187,12 @@ int uv_fs_write(uv_loop_t* loop,
   memcpy(req->bufs, bufs, nbufs * sizeof(*bufs));
 
   req->off = off;
+#ifndef USE_LINUX_AIO
   POST;
+#else
+  if (!cb) POST;
+  return POST_AIO(loop, req);
+#endif
 }
 
 

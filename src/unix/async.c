@@ -36,7 +36,6 @@
 static void uv__async_event(uv_loop_t* loop,
                             struct uv__async* w,
                             unsigned int nevents);
-static int uv__async_eventfd(void);
 
 
 int uv_async_init(uv_loop_t* loop, uv_async_t* handle, uv_async_cb async_cb) {
@@ -89,7 +88,7 @@ static void uv__async_event(uv_loop_t* loop,
 
     if (h->async_cb == NULL)
       continue;
-    h->async_cb(h);
+    h->async_cb(h); /*call uv_getevent(), nevents assign to *data */
   }
 }
 
@@ -153,7 +152,7 @@ void uv__async_send(struct uv__async* wa) {
     static const uint64_t val = 1;
     buf = &val;
     len = sizeof(val);
-    fd = wa->io_watcher.fd;  /* eventfd */
+    fd = wa->io_watcher.fd;  /* use eventfd */
   }
 #endif
 
@@ -241,7 +240,7 @@ void uv__async_stop(uv_loop_t* loop, struct uv__async* wa) {
 }
 
 
-static int uv__async_eventfd() {
+int uv__async_eventfd() {
 #if defined(__linux__)
   static int no_eventfd2;
   static int no_eventfd;

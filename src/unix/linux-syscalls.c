@@ -77,6 +77,58 @@
 # endif
 #endif /* __NR_eventfd2 */
 
+
+#ifndef __NR_io_setup
+# if defined(__x86_64__)
+#  define __NR_io_setup 273
+# elif defined(__i386__)
+#  define __NR_io_setup 245
+# elif defined(__arm__)
+#  define __NR_io_setup (UV_SYSCALL_BASE + 243)
+# endif
+#endif /* __NR_io_setup */
+
+#ifndef __NR_io_destroy
+# if defined(__x86_64__)
+#  define __NR_io_destroy 274
+# elif defined(__i386__)
+#  define __NR_io_destroy 246
+# elif defined(__arm__)
+#  define __NR_io_destroy (UV_SYSCALL_BASE + 244)
+# endif
+#endif /* __NR_io_destroy */
+
+#ifndef __NR_io_getevents
+# if defined(__x86_64__)
+#  define __NR_io_getevents 275
+# elif defined(__i386__)
+#  define __NR_io_getevents 247
+# elif defined(__arm__)
+#  define __NR_io_getevents (UV_SYSCALL_BASE + 245)
+# endif
+#endif /* __NR_io_getevents */
+
+#ifndef __NR_io_submit
+# if defined(__x86_64__)
+#  define __NR_io_submit 276
+# elif defined(__i386__)
+#  define __NR_io_submit 248
+# elif defined(__arm__)
+#  define __NR_io_submit (UV_SYSCALL_BASE + 246)
+# endif
+#endif /* __NR_io_submit */
+
+#ifndef __NR_io_cancel
+# if defined(__x86_64__)
+#  define __NR_io_cancel 277
+# elif defined(__i386__)
+#  define __NR_io_cancel 249
+# elif defined(__arm__)
+#  define __NR_io_cancel (UV_SYSCALL_BASE + 247)
+# endif
+#endif /* __NR_io_cancel */
+
+
 #ifndef __NR_epoll_create
 # if defined(__x86_64__)
 #  define __NR_epoll_create 213
@@ -469,3 +521,51 @@ int uv__dup3(int oldfd, int newfd, int flags) {
   return errno = ENOSYS, -1;
 #endif
 }
+
+
+int uv__setup(unsigned nr, aio_context_t *ctxp) {
+#if defined(__NR_io_setup)
+    return syscall(__NR_io_setup, nr, ctxp);
+#else
+    return errno = ENOSYS, -1;
+#endif
+}
+
+
+int uv__submit(aio_context_t ctx, long nr,  struct iocb **iocbpp) {
+#if defined(__NR_io_submit)
+    return syscall(__NR_io_submit, ctx, nr, iocbpp);
+#else
+    assert(0);
+    return errno = ENOSYS, -1;
+#endif
+}
+
+
+int uv__getevents(aio_context_t ctx, long min_nr, long max_nr,
+        struct io_event *events, struct timespec *timeout) {
+#if defined(__NR_io_getevents)
+    return syscall(__NR_io_getevents, ctx, min_nr, max_nr, events, timeout);
+#else
+    return errno = ENOSYS, -1;
+#endif
+}
+
+
+int uv__destroy(aio_context_t ctx) {
+#if defined(__NR_io_destroy)
+    return syscall(__NR_io_destroy, ctx);
+#else
+    return errno = ENOSYS, -1;
+#endif
+}
+
+int uv__cancel(aio_context_t ctx, struct iocb *iocb,
+               struct io_event *event) {
+#if defined(__NR_io_cancel)
+    return syscall(__NR_io_cancel, ctx, iocb, event);
+#else
+    return errno = ENOSYS, -1;
+#endif
+}
+
