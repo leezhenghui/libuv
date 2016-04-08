@@ -43,6 +43,7 @@
 #endif
 #include <signal.h>
 
+#include "list.h"
 #include "uv-threadpool.h"
 
 #if defined(__linux__)
@@ -225,10 +226,7 @@ typedef struct {
   void* idle_handles[2];                                                      \
   void* async_handles[2];                                                     \
   struct uv__async async_watcher;                                             \
-  struct {                                                                    \
-    void* min;                                                                \
-    unsigned int nelts;                                                       \
-  } timer_heap;                                                               \
+  struct tvec_base vec_base;                                                 \
   uint64_t timer_counter;                                                     \
   uint64_t time;                                                              \
   int signal_pipefd[2];                                                       \
@@ -315,7 +313,7 @@ typedef struct {
 
 #define UV_TIMER_PRIVATE_FIELDS                                               \
   uv_timer_cb timer_cb;                                                       \
-  void* heap_node[3];                                                         \
+  struct list_head entry;                                                     \
   uint64_t timeout;                                                           \
   uint64_t repeat;                                                            \
   uint64_t start_id;

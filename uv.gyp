@@ -17,7 +17,7 @@
       }],
     ],
     'xcode_settings': {
-      'WARNING_CFLAGS': [ '-Wall', '-Wextra', '-Wno-unused-parameter' ],
+      'WARNING_CFLAGS': [ '-Wall', '-Wextra', '-Wno-unused-parameter',],
       'OTHER_CFLAGS': [ '-g', '--std=gnu89', '-pedantic' ],
     }
   },
@@ -123,6 +123,7 @@
             '-Wall',
             '-Wextra',
             '-Wno-unused-parameter',
+            '-Wno-language-extension-token',
           ],
           'sources': [
             'include/uv-unix.h',
