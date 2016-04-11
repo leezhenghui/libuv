@@ -42,8 +42,7 @@ int uv__init_timers(uv_loop_t* loop)
     INIT_LIST_HEAD (base->tv1.vec + j);
   }
 
-  base->next_tick = 1;
-  base->now_ = loop->time - 1;
+  base->next_tick = loop->time;
   return 0;
 }
 
@@ -51,14 +50,12 @@ void add_timer(struct tvec_base *base, uv_timer_t *timer)
 {
   int i;
   long idx;
-  long expires;
+  long expires = timer->timeout;
   struct list_head *vec;
   // 1ms
-  idx = (timer->timeout - base->now_);
-  //if (timer->timeout == (uint64_t)-1 && (signed long) idx < 0) assert(0);
+  idx = (timer->timeout - base->next_tick);
+  //fprintf(stderr, "add %llx, %lld\n", timer, idx);
   if ((unsigned long)idx > LONG_MAX) idx = LONG_MAX;
-
-  expires = idx + base->next_tick;
 
   if (idx < TVR_SIZE) {
     i = expires & TVR_MASK;
@@ -113,6 +110,7 @@ int uv_timer_init(uv_loop_t* loop, uv_timer_t* handle) {
   uv__handle_init(loop, (uv_handle_t*)handle, UV_TIMER);
   handle->timer_cb = NULL;
   handle->repeat = 0;
+  INIT_LIST_HEAD(&handle->entry);
   return 0;
 }
 
@@ -138,7 +136,7 @@ int uv_timer_start(uv_timer_t* handle,
   handle->timeout = clamped_timeout;
   handle->repeat = repeat;
   /* start_id is the second index to be compared in uv__timer_cmp() */
-  handle->start_id = handle->loop->timer_counter++;
+  //handle->start_id = handle->loop->timer_counter++;
 
   add_timer(&handle->loop->vec_base, handle);
   uv__handle_start(handle);
@@ -182,8 +180,7 @@ uint64_t uv_timer_get_repeat(const uv_timer_t* handle) {
 
 
 int uv__next_timeout(const uv_loop_t* loop) {
-  //const struct heap_node* heap_node;
-  //const uv_timer_t* handle;
+  
   int j;
   uint64_t diff = 0;
   const struct tvec_base *base = &loop->vec_base;
@@ -192,37 +189,23 @@ int uv__next_timeout(const uv_loop_t* loop) {
        ++diff;
     }
   }
-  //printf("timeout %lld\n", diff);
-  return diff;
-  // heap_node = heap_min((const struct heap*) &loop->timer_heap);
-  // if (heap_node == NULL)
-  //   return -1; /* block indefinitely */
-
-  // handle = container_of(heap_node, const uv_timer_t, heap_node);
-  // if (handle->timeout <= loop->time)
-  //   return 0;
-
-  // diff = handle->timeout - loop->time;
-  // if (diff > INT_MAX)
-  //   diff = INT_MAX;
-
-  // return diff;
+  if (diff == TVR_SIZE) return 0;
+  
+  return 10;
+ 
 }
 
 #define INDEX(N)  ((base->next_tick >> (TVR_BITS + N * TVN_BITS)) & TVN_MASK)
 
 void uv__run_timers(uv_loop_t* loop) {
-  unsigned long index;
   uv_timer_t* handle;
-  struct list_head work_list;
-  struct list_head *head = &work_list;
   uint64_t catchup = uv__hrtime(UV_CLOCK_FAST) / 1000000;
   struct tvec_base *base = &loop->vec_base;
-  //printf("%lld, %lld\n", base->now_, catchup);
-  while (base->now_ < catchup)
-  {
-    base->now_ += 1;
-    index  = base->next_tick & TVR_MASK;
+  
+  while (base->next_tick <= catchup) {
+    struct list_head work_list;
+    struct list_head *head = &work_list;
+    int index  = base->next_tick & TVR_MASK;
 
     if (!index &&
         (!cascade (base, &base->tv2, INDEX(0))) &&
@@ -235,7 +218,7 @@ void uv__run_timers(uv_loop_t* loop) {
     while (!list_empty(head)) {
       handle = list_first_entry (head, uv_timer_t, entry);
       if (handle->timeout > catchup) 
-        printf("%lld, %lld\n", handle->timeout, catchup);
+        assert(0);
       uv_timer_stop(handle);
       uv_timer_again(handle);
       handle->timer_cb(handle);

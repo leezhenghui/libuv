@@ -219,17 +219,6 @@ list_replace_init (struct list_head *old, struct list_head *new)
 	     &pos->member != (head); 					\
 	     pos = n, n = list_entry(n->member.next, typeof(*n), member))
 
-#define list_for_each_entry_reverse(pos, head, member)                  \
-	for (pos = list_entry((head)->prev, typeof(*pos), member);      \
-	     &pos->member != (head);                                    \
-	     pos = list_entry(pos->member.prev, typeof(*pos), member))
-
-
-#define list_for_each_entry_safe_reverse(pos, n, head, member)          \
-	for (pos = list_entry((head)->prev, typeof(*pos), member),      \
-	        n = list_entry(pos->member.prev, typeof(*pos), member); \
-	     &pos->member != (head);                                    \
-	     pos = n, n = list_entry(n->member.prev, typeof(*n), member))
 
 //---------------------------------------------------------------------//
 
@@ -251,7 +240,6 @@ struct tvec_root {
 };
 
 struct tvec_base {
-    uint64_t  now_;                                                   
     unsigned long next_tick;
     struct tvec_root tv1;
     struct tvec tv2;

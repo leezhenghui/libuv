@@ -75,6 +75,7 @@ BENCHMARK_DECLARE (spawn)
 BENCHMARK_DECLARE (thread_create)
 BENCHMARK_DECLARE (million_async)
 BENCHMARK_DECLARE (million_timers)
+BENCHMARK_DECLARE (million_timers_cancel)
 HELPER_DECLARE    (tcp4_blackhole_server)
 HELPER_DECLARE    (tcp_pump_server)
 HELPER_DECLARE    (pipe_pump_server)
@@ -160,4 +161,5 @@ TASK_LIST_START
   BENCHMARK_ENTRY  (thread_create)
   BENCHMARK_ENTRY  (million_async)
   BENCHMARK_ENTRY  (million_timers)
+  BENCHMARK_ENTRY  (million_timers_cancel)
 TASK_LIST_END
