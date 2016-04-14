@@ -27,8 +27,8 @@ TEST_IMPL(get_memory) {
   uint64_t total_mem = uv_get_total_memory();
 
   printf("free_mem=%llu, total_mem=%llu\n",
-         (unsigned long long) free_mem,
-         (unsigned long long) total_mem);
+         (uint64_t) free_mem,
+         (uint64_t) total_mem);
 
   ASSERT(free_mem > 0);
   ASSERT(total_mem > 0);

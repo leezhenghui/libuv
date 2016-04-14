@@ -48,7 +48,7 @@ TEST_IMPL(platform_output) {
 
   err = uv_resident_set_memory(&rss);
   ASSERT(err == 0);
-  printf("uv_resident_set_memory: %llu\n", (unsigned long long) rss);
+  printf("uv_resident_set_memory: %llu\n", (uint64_t) rss);
 
   err = uv_uptime(&uptime);
   ASSERT(err == 0);
@@ -63,11 +63,11 @@ TEST_IMPL(platform_output) {
   ASSERT(rusage.ru_stime.tv_usec >= 0);
   printf("uv_getrusage:\n");
   printf("  user: %llu sec %llu microsec\n",
-         (unsigned long long) rusage.ru_utime.tv_sec,
-         (unsigned long long) rusage.ru_utime.tv_usec);
+         (uint64_t) rusage.ru_utime.tv_sec,
+         (uint64_t) rusage.ru_utime.tv_usec);
   printf("  system: %llu sec %llu microsec\n",
-         (unsigned long long) rusage.ru_stime.tv_sec,
-         (unsigned long long) rusage.ru_stime.tv_usec);
+         (uint64_t) rusage.ru_stime.tv_sec,
+         (uint64_t) rusage.ru_stime.tv_usec);
 
   err = uv_cpu_info(&cpus, &count);
   ASSERT(err == 0);
@@ -76,14 +76,14 @@ TEST_IMPL(platform_output) {
   for (i = 0; i < count; i++) {
     printf("  model: %s\n", cpus[i].model);
     printf("  speed: %d\n", cpus[i].speed);
-    printf("  times.sys: %llu\n", (unsigned long long) cpus[i].cpu_times.sys);
+    printf("  times.sys: %llu\n", (uint64_t) cpus[i].cpu_times.sys);
     printf("  times.user: %llu\n",
-           (unsigned long long) cpus[i].cpu_times.user);
+           (uint64_t) cpus[i].cpu_times.user);
     printf("  times.idle: %llu\n",
-           (unsigned long long) cpus[i].cpu_times.idle);
-    printf("  times.irq: %llu\n",  (unsigned long long) cpus[i].cpu_times.irq);
+           (uint64_t) cpus[i].cpu_times.idle);
+    printf("  times.irq: %llu\n",  (uint64_t) cpus[i].cpu_times.irq);
     printf("  times.nice: %llu\n",
-           (unsigned long long) cpus[i].cpu_times.nice);
+           (uint64_t) cpus[i].cpu_times.nice);
   }
   uv_free_cpu_info(cpus, count);
 
